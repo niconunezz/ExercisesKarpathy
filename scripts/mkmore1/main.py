@@ -20,7 +20,7 @@ def generate_data():
 
     return onehotx, onehoty, xdata, ydata, vocab_size, char_to_idx, idx_to_char
 
-def train(onehotx, onehoty, ydata, vocab_size, train_steps=500):
+def train(onehotx, onehoty, ydata, vocab_size, train_steps=1000):
     W = torch.randn(vocab_size, vocab_size, requires_grad=True)
     num = onehotx.size(0)
     for step in range(train_steps):
