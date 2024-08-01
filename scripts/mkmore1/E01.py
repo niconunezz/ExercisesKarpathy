@@ -6,7 +6,7 @@ def generate_data():
     with open('names.txt', 'r') as f:
         names = f.read().splitlines()
 
-        names = ('.' + '.'.join(names)).lower()
+        names = ('.' + '.'.join(names))
         chars=  [c for c in names]
         xs=  [(chars[i],chars[i+1]) for i in range(len(chars)-2)]
         
@@ -31,22 +31,22 @@ def generate_data():
     
     return onehotx, onehoty, xdata, ydata, yvocab, yvocab_size, xvocab, xvocab_size, xchar_to_idx, yidx_to_char
 
-def train(onehotx, onehoty, ydata, xvocab_size, yvocab_size, train_steps=650):
+def train(onehotx, onehoty, ydata, xvocab_size, yvocab_size, train_steps=500):
     W = torch.randn(xvocab_size, yvocab_size, requires_grad=True)
     num = onehotx.size(0)
     for step in range(train_steps):
         logits = onehotx @ W # (num, xvocab_size) @ (xvocab_size, yvocab_size) = (num, yvocab_size)
         counts = logits.exp()
         probs = counts / counts.sum(dim=1, keepdim=True) # (num, yvocab_size)
-        loss = -probs[torch.arange(num), ydata].log().mean()
+        loss = -probs[torch.arange(num), ydata].log().mean() + 0.1 * (W**2).mean()
 
         if step % 100 == 0:
             print(f'step {step}, loss {loss.item()}')
         
         W.grad = None
         loss.backward()
-        with torch.no_grad():
-            W -= 50 * W.grad
+        
+        W.data -= 50 * W.grad
 
     return W
 import random
@@ -56,6 +56,7 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
         seeds = [('a','n'),('a','l'),('a','r'),('a','b'),('a','c'),('a','d'),('a','e'),('a','f'),('a','g'),('a','h'),('a','i'),('a','j'),('a','k'),('a','m'),('a','o'),('a','p'),('a','q'),('a','s'),('a','t'),('a','u'),('a','v'),('a','w'),('a','x'),('a','z')]
         seed = random.choice(seeds)
         string = seed[0]+seed[1]
+        
         idx = xchar_to_idx[seed]
         for i in range(length):
             onehotx = F.one_hot(torch.tensor([idx]), xvocab_size).float()
@@ -64,8 +65,8 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
             probs = counts / counts.sum(dim=1, keepdim=True) # (1, yvocab_size)
         
             
-            # sidx = torch.multinomial(probs,1)
-            sidx = torch.argmax(probs)
+            sidx = torch.multinomial(probs,1)
+            # sidx = torch.argmax(probs)
             
             tok = yidx_to_char[sidx.item()]
             
@@ -75,8 +76,11 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
                 break
             else:
                 string += tok
+                print(f"string: {string}")
             
             idx = xchar_to_idx.get(nstring,0)
+            if idx == 0:
+                break
     return string
 
 
