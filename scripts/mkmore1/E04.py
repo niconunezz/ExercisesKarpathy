@@ -6,7 +6,7 @@ def generate_data():
     with open('names.txt', 'r') as f:
         names = f.read().splitlines()
 
-        names = ('.' + '.'.join(names))
+        names = ('..' + '..'.join(names))
         chars=  [c for c in names]
         xs=  [(chars[i],chars[i+1]) for i in range(len(chars)-2)]
         
@@ -29,9 +29,9 @@ def generate_data():
     
     return xdata, ydata, yvocab_size, xvocab_size, xchar_to_idx, yidx_to_char
 
-def train(onehotx, onehoty, xdata, ydata, xvocab_size, yvocab_size, train_steps=20):
+def train(xdata, ydata, xvocab_size, yvocab_size, train_steps=500):
     W = torch.randn(xvocab_size, yvocab_size, requires_grad=True)
-    num = onehotx.size(0)
+    num = len(xdata)
     for step in range(train_steps):
         # as karpathy explain on his video, by using onehot(x_i) we are just taking the ith row of W
         # so we can just use xdata directly, making the code more readable and efficient
@@ -54,11 +54,9 @@ import random
 def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
 
     with torch.no_grad():
-        seeds = [('a','n'),('a','l'),('a','r'),('a','b'),('a','c'),('a','d'),('a','e'),('a','f'),('a','g'),('a','h'),('a','i'),('a','j'),('a','k'),('a','m'),('a','o'),('a','p'),('a','q'),('a','s'),('a','t'),('a','u'),('a','v'),('a','w'),('a','x'),('a','z')]
-        seed = random.choice(seeds)
-        string = seed[0]+seed[1]
         
-        idx = xchar_to_idx[seed]
+        string = '..'
+        idx = xchar_to_idx[('.', '.')]
         for i in range(length):
             xdata = torch.tensor([idx])
             logits = W[xdata]
@@ -67,7 +65,6 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
         
             
             sidx = torch.multinomial(probs,1)
-            
             tok = yidx_to_char[sidx.item()]
             
             
@@ -76,7 +73,6 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
                 break
             else:
                 string += tok
-                print(f"string: {string}")
             
             idx = xchar_to_idx.get(nstring,0)
             if idx == 0:

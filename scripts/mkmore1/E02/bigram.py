@@ -26,7 +26,7 @@ def generate_data(type='train'):
 
     return onehotx, onehoty, xdata, ydata, vocab_size, char_to_idx, idx_to_char
 
-def train(onehotx, onehoty, ydata, vocab_size, train_steps=300):
+def train(onehotx, onehoty, ydata, vocab_size, reg,train_steps=500):
     g = torch.Generator().manual_seed(2147483647)
     W = torch.randn((vocab_size, vocab_size), requires_grad=True, generator=g)
     num = onehotx.size(0)
@@ -34,7 +34,7 @@ def train(onehotx, onehoty, ydata, vocab_size, train_steps=300):
         logits = onehotx @ W # (num, vocab_size)
         counts = logits.exp() 
         probs = counts / counts.sum(dim=1, keepdim=True)
-        loss = -probs[torch.arange(num), ydata].log().mean() + 0.1 * W.pow(2).mean()
+        loss = -probs[torch.arange(num), ydata].log().mean() + reg * W.pow(2).mean()
         if step % 100 == 0:
             print(f'step {step}, loss {loss.item()}')
 
@@ -83,12 +83,14 @@ def test(W, type = 'test'):
 
 
 def main():
+    reg = 0.1
     onehotx, onehoty, xdata, ydata, vocab_size, char_to_idx, idx_to_char = generate_data(type='train')
-    W = train(onehotx, onehoty, ydata, vocab_size)
+    W = train(onehotx, onehoty, ydata, vocab_size, reg)
     string = generate(W, char_to_idx, idx_to_char, vocab_size)
     print(string)
 
     print("====================")
+    print("With reg: ", reg)
     print("Testing")
     print(test(W, type='test'))
     print("Validation")

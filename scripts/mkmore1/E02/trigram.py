@@ -5,7 +5,7 @@ import numpy as np
 def generate_data(type='train'):
     with open('names.txt', 'r') as f:
         names = f.read().splitlines()
-        names = ('.' + '.'.join(names))
+        names = ('..' + '..'.join(names))
         chars=  [c for c in names]
         xs=  [(chars[i],chars[i+1]) for i in range(len(chars)-2)]
         xvocab = sorted(set(xs))
@@ -64,11 +64,9 @@ import random
 def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
 
     with torch.no_grad():
-        seeds = [('a','n'),('a','l'),('a','r'),('a','b'),('a','c'),('a','d'),('a','e'),('a','f'),('a','g'),('a','h'),('a','i'),('a','j'),('a','k'),('a','m'),('a','o'),('a','p'),('a','q'),('a','s'),('a','t'),('a','u'),('a','v'),('a','w'),('a','x'),('a','z'),('e','n'),('e','l'),('e','r'),('e','s'),('e','m'),('e','t'),('e','d'),('e','c'),('i','n'),('i','l'),('i','r'),('i','s'),('i','m'),('i','d'),('i','c'),('i','t'),('o','n'),('o','l'),('o','r'),('o','s'),('o','m'),('o','t'),('o','d'),('o','c'),('u','n'),('u','l'),('u','r'),('u','s'),('u','m'),('u','t'),('u','d'),('u','c'),('b','a'),('b','e'),('b','i'),('b','o'),('b','u'),('b','r'),('b','l'),('c','a'),('c','e'),('c','i'),('c','o'),('c','u'),('c','r'),('c','l'),('d','a'),('d','e'),('d','i'),('d','o'),('d','u'),('d','r'),('f','a'),('f','e'),('f','i'),('f','o'),('f','u'),('f','r'),('f','l'),('g','a'),('g','e'),('g','i'),('g','o'),('g','u'),('g','r'),('g','l'),('h','a'),('h','e'),('h','i'),('h','o'),('h','u'),('j','a'),('j','e'),('j','i'),('j','o'),('j','u'),('k','a'),('k','e'),('k','i'),('k','o'),('k','u'),('l','a'),('l','e'),('l','i'),('l','o'),('l','u'),('m','a'),('m','e'),('m','i'),('m','o'),('m','u'),('n','a'),('n','e'),('n','i'),('n','o'),('n','u'),('p','a'),('p','e'),('p','i'),('p','o'),('p','u'),('p','r'),('p','l'),('r','a'),('r','e'),('r','i'),('r','o'),('r','u'),('s','a'),('s','e'),('s','i'),('s','o'),('s','u'),('t','a'),('t','e'),('t','i'),('t','o'),('t','u'),('t','r'),('v','a'),('v','e'),('v','i'),('v','o'),('v','u'),('w','a'),('w','e'),('w','i'),('w','o'),('w','u'),('x','a'),('x','e'),('x','i'),('x','o'),('x','u'),('y','a'),('y','e'),('y','i'),('y','o'),('y','u'),('z','a'),('z','e'),('z','i'),('z','o'),('z','u')]
-        seed = random.choice(seeds)
-        string = seed[0]+seed[1]
+        string = '..'
         
-        idx = xchar_to_idx[seed]
+        idx = xchar_to_idx[('.', '.')]
         for i in range(length):
             onehotx = F.one_hot(torch.tensor([idx]), xvocab_size).float()
             logits = onehotx @ W
@@ -77,7 +75,7 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
         
             
             sidx = torch.multinomial(probs,1)
-            # sidx = torch.argmax(probs)
+           
             
             tok = yidx_to_char[sidx.item()]
             
@@ -87,7 +85,6 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
                 break
             else:
                 string += tok
-                print(f"string: {string}")
             
             idx = xchar_to_idx.get(nstring,0)
             if idx == 0:
