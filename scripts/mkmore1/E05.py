@@ -46,24 +46,33 @@ def generate_data(type='train'):
     
     return onehotx, onehoty, xdata, ydata, yvocab, yvocab_size, xvocab, xvocab_size, xchar_to_idx, yidx_to_char
 
-def train(onehotx, onehoty, ydata, xvocab_size, yvocab_size, train_steps=15):
+def train(onehotx, onehoty, ydata, xvocab_size, yvocab_size, train_steps=500):
     W = torch.randn(xvocab_size, yvocab_size, requires_grad=True)
     num = onehotx.size(0)
     for step in range(train_steps):
         logits = onehotx @ W # (num, xvocab_size) @ (xvocab_size, yvocab_size) = (num, yvocab_size)
         
+        # pytorch cross entropy loss implementation
+        # it goes: softmax -> log -> nll_loss
         counts = logits.exp()
         probs = counts / counts.sum(dim=1, keepdim=True) # (num, yvocab_size)
         logprobs = probs.log()
         loss = -logprobs[torch.arange(num), ydata].mean()
+        
         CE = nn.CrossEntropyLoss()
         loss2 = CE(logits, ydata)
+        # if you want to check
+        #print(torch.allclose(loss, loss2))
+
+        # the calculated loss between CE and NLL is the same, for what i have seen
+        # you should prefer (in pytorch) cross entropy loss, because it is more stable
+        # as log+softmax is done by the framework using log_softmax which is donde in
+        # a more efficient way
+
+        reg = 0.1 * (W ** 2).mean()
+        loss += reg
 
         
-        
-
-
-
         if step % 100 == 0:
             print(f'step {step}, loss {loss.item()}')
         
