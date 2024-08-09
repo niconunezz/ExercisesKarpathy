@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch import nn
-import numpy as np
+
 def generate_data():
     with open('names.txt', 'r') as f:
         names = f.read().splitlines()

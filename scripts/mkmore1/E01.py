@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch import nn
-import numpy as np
+
 def generate_data():
     with open('names.txt', 'r') as f:
         names = f.read().splitlines()
@@ -12,8 +11,6 @@ def generate_data():
         xvocab = sorted(set(xs))
         xvocab_size = len(xvocab)
         xchar_to_idx = {ch: i for i, ch in enumerate(xvocab)}
-        xidx_to_char = {i: ch for i, ch in enumerate(xvocab)}
-        
         
         yvocab = sorted(set(names))
         yvocab_size = len(yvocab)
@@ -27,9 +24,11 @@ def generate_data():
         onehoty = F.one_hot(ydata, yvocab_size).float()
     
     
-    return onehotx, onehoty, xdata, ydata, yvocab, yvocab_size, xvocab, xvocab_size, xchar_to_idx, yidx_to_char
+    return onehotx, ydata, yvocab_size , xvocab_size, xchar_to_idx, yidx_to_char
 
-def train(onehotx, onehoty, ydata, xvocab_size, yvocab_size, train_steps=500):
+
+
+def train(onehotx, ydata, xvocab_size, yvocab_size, train_steps=500):
     W = torch.randn(xvocab_size, yvocab_size, requires_grad=True)
     num = onehotx.size(0)
     for step in range(train_steps):
@@ -80,12 +79,12 @@ def generate(W, xchar_to_idx, yidx_to_char, xvocab_size,length=13):
 
 def main():
     #
-    onehotx, onehoty, xs, ys, yvocab, yvocab_size, xvocab, xvocab_size, xchar_to_idx, yidx_to_char= generate_data()
+    onehotx, ys, yvocab_size, xvocab_size, xchar_to_idx, yidx_to_char= generate_data()
     
     print(f'x vocab_size {xvocab_size}') 
     print(f'y vocab_size {yvocab_size}')
     # now the prob table(W) is 574 x 55
-    W = train(onehotx, onehoty, ys, xvocab_size, yvocab_size)
+    W = train(onehotx, ys, xvocab_size, yvocab_size)
 
     for i in range(15):
         string = generate(W, xchar_to_idx, yidx_to_char, xvocab_size)

@@ -1,7 +1,5 @@
 import torch
 import torch.nn.functional as F
-import torch.nn as nn
-import numpy as np
 
 # the main difference between neg log likelihood (NLL) and cross entropy (CE) is that
 # NLL expects the input to be log probabilities, while CE expects just raw logits
